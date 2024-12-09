@@ -1,5 +1,3 @@
-from langchain_ollama import OllamaLLM
-from PIL import Image
 import json
 from typing import Any
 from pathlib import Path
