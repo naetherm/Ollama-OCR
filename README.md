@@ -1,7 +1,7 @@
-<a href="https://github.com/imanoop7/Ollama-OCR"><img src="https://img.shields.io/github/stars/imanoop7/Ollama-OCR.svg?style=social&label=Star" alt="Stargazers"></a>
-<a href="https://github.com/imanoop7/Ollama-OCR/graphs/commit-activity"><img src="https://img.shields.io/github/commit-activity/m/imanoop7/Ollama-OCR.svg" alt="Commit Activity"></a>
-<a href="https://github.com/imanoop7/Ollama-OCR"><img src="https://img.shields.io/github/last-commit/imanoop7/Ollama-OCR.svg" alt="Last Commit"></a>
-<a href="https://github.com/imanoop7/Ollama-OCR/graphs/contributors"><img src="https://img.shields.io/github/contributors-anon/imanoop7/Ollama-OCR.svg" alt="Contributors"></a>
+<a href="https://github.com/naetherm/Ollama-OCR"><img src="https://img.shields.io/github/stars/naetherm/Ollama-OCR.svg?style=social&label=Star" alt="Stargazers"></a>
+<a href="https://github.com/naetherm/Ollama-OCR/graphs/commit-activity"><img src="https://img.shields.io/github/commit-activity/m/naetherm/Ollama-OCR.svg" alt="Commit Activity"></a>
+<a href="https://github.com/naetherm/Ollama-OCR"><img src="https://img.shields.io/github/last-commit/naetherm/Ollama-OCR.svg" alt="Last Commit"></a>
+<a href="https://github.com/naetherm/Ollama-OCR/graphs/contributors"><img src="https://img.shields.io/github/contributors-anon/naetherm/Ollama-OCR.svg" alt="Contributors"></a>
 # Ollama OCR 🔍
 
 A powerful OCR (Optical Character Recognition) package that uses state-of-the-art vision language models through Ollama to extract text from images. Available both as a Python package and a Streamlit web application.
@@ -27,13 +27,15 @@ A powerful OCR (Optical Character Recognition) package that uses state-of-the-ar
 
 ## 📦 Package Installation
 
+As this is a fork, originally coming from `https://github.com/imanoop7/Ollama-OCR` this package can not be installed though pypi.
+
 ```bash
-pip install ollama-ocr
+git clone https://github.com/naetherm/Ollama-OCR.git
 ```
 
 ## 🚀 Quick Start
 ### Prerequisites
-1. Install Ollama
+1. Install Ollama as described here: https://ollama.com/download
 2. Pull the required model:
 
 ```bash
@@ -43,6 +45,8 @@ ollama pull llama3.2-vision:11b
 
 ### Single Image Processing
 
+Either provide the path to the image file:
+
 ```python
 from ollama_ocr import OCRProcessor
 
@@ -51,7 +55,26 @@ ocr = OCRProcessor(model_name='llama3.2-vision:11b')  # You can use any vision m
 
 # Process an image
 result = ocr.process_image(
-    image_path="path/to/your/image.png",
+    image="path/to/your/image.png",
+    format_type="markdown"  # Options: markdown, text, json, structured, key_value
+)
+print(result)
+```
+
+Or, if your process provides the image already in a loaded state:
+
+```python
+from ollama_ocr import OCRProcessor
+import cv2
+
+image = cv2.imread("path/to/your/image.png")
+
+# Initialize OCR processor
+ocr = OCRProcessor(model_name='llama3.2-vision:11b')  # You can use any vision model available on Ollama
+
+# Process an image
+result = ocr.process_image(
+    image=image,
     format_type="markdown"  # Options: markdown, text, json, structured, key_value
 )
 print(result)
@@ -67,7 +90,7 @@ ocr = OCRProcessor(model_name='llama3.2-vision:11b', max_workers=4)  # max worke
 # Process multiple images
 # Process multiple images with progress tracking
 batch_results = ocr.process_batch(
-    input_path="path/to/images/folder",  # Directory or list of image paths
+    input="path/to/images/folder",  # Directory or list of image paths
     format_type="markdown",
     recursive=True,  # Search subdirectories
     preprocess=True  # Enable image preprocessing
@@ -105,7 +128,7 @@ print(f"Failed: {batch_results['statistics']['failed']}")
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/imanoop7/Ollama-OCR.git
+git clone https://github.com/naetherm/Ollama-OCR.git
 cd Ollama-OCR
 ```
 2. Install dependencies:
@@ -142,5 +165,5 @@ Powered by LLaMA Vision Models
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=imanoop7/Ollama-OCR&type=Date)](https://star-history.com/#imanoop7/Ollama-OCR&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=naetherm/Ollama-OCR&type=Date)](https://star-history.com/#naetherm/Ollama-OCR&Date)
 
