@@ -8,7 +8,6 @@ import base64
 import requests
 from tqdm import tqdm
 import concurrent.futures
-from pathlib import Path
 import cv2
 import numpy as np
 from pdf2image import convert_from_path
@@ -79,24 +78,27 @@ class OCRProcessor:
         self.base_url = "http://localhost:11434/api/generate"
         self.max_workers = max_workers
 
-    def process_image(self, image_path: Path, format_type: str = "markdown", preprocess: bool = True) -> str:
+    def process_image(self, image: Path | np.ndarray, format_type: str = "markdown", preprocess: bool = True) -> str:
         """
         Process an image and extract text in the specified format
         
         Args:
-            image_path: Path to the image file
+            image: Can be a path to a file or an already loaded image
             format_type: One of ["markdown", "text", "json", "structured", "key_value"]
             preprocess: Whether to apply image preprocessing
         """
         try:
-            if preprocess:
-                image_path = _preprocess_image(image_path)
-            
-            image_base64 = _encode_image(image_path)
-            
-            # Clean up temporary files
-            if image_path.stem.endswith(('_preprocessed.jpg', '_temp.jpg')):
-                os.remove(image_path)
+            if isinstance(image, Path):
+                if preprocess:
+                    image = _preprocess_image(image)
+
+                image_base64 = _encode_image(image)
+
+                # Clean up temporary files
+                if image.stem.endswith(('_preprocessed.jpg', '_temp.jpg')):
+                    os.remove(image)
+            else:
+                image_base64 = base64.b64encode(image)
 
             # Generic prompt templates for different formats
             prompts = {
