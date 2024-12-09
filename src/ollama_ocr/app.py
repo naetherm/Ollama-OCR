@@ -1,5 +1,6 @@
 import streamlit as st
 from .ocr_processor import OCRProcessor
+from pathlib import Path
 import tempfile
 import os
 from PIL import Image
@@ -59,14 +60,16 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+
 def get_available_models():
     return ["llava:7b", "llama3.2-vision:11b"]
 
-def process_single_image(processor, image_path, format_type, enable_preprocessing):
+
+def process_single_image(processor: OCRProcessor, image_path: Path, format_type: str, enable_preprocessing: bool):
     """Process a single image and return the result"""
     try:
         result = processor.process_image(
-            image_path=image_path,
+            image=image_path,
             format_type=format_type,
             preprocess=enable_preprocessing
         )
@@ -74,7 +77,8 @@ def process_single_image(processor, image_path, format_type, enable_preprocessin
     except Exception as e:
         return f"Error processing image: {str(e)}"
 
-def process_batch_images(processor, image_paths, format_type, enable_preprocessing):
+
+def process_batch_images(processor: OCRProcessor, image_paths: list[Path], format_type: str, enable_preprocessing: bool):
     """Process multiple images and return results"""
     try:
         results = processor.process_batch(
@@ -86,20 +90,22 @@ def process_batch_images(processor, image_paths, format_type, enable_preprocessi
     except Exception as e:
         return {"error": str(e)}
 
+
 def main():
     st.title("🔍 Vision OCR Lab")
-    st.markdown("<p style='text-align: center; color: #666;'>Powered by Ollama Vision Models</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #666;'>Powered by Ollama Vision Models</p>",
+                unsafe_allow_html=True)
 
     # Sidebar controls
     with st.sidebar:
         st.header("🎮 Controls")
-        
+
         selected_model = st.selectbox(
             "🤖 Select Vision Model",
             get_available_models(),
             index=0,
         )
-        
+
         format_type = st.selectbox(
             "📄 Output Format",
             ["markdown", "text", "json", "structured", "key_value"],
@@ -119,9 +125,9 @@ def main():
             value=True,
             help="Apply image enhancement and preprocessing"
         )
-        
+
         st.markdown("---")
-        
+
         # Model info box
         if selected_model == "llava:7b":
             st.info("LLaVA 7B: Efficient vision-language model optimized for real-time processing")
@@ -133,7 +139,7 @@ def main():
 
     # Main content area with tabs
     tab1, tab2 = st.tabs(["📸 Image Processing", "ℹ️ About"])
-    
+
     with tab1:
         # File upload area with multiple file support
         uploaded_files = st.file_uploader(
@@ -146,11 +152,12 @@ def main():
         if uploaded_files:
             # Create a temporary directory for uploaded files
             with tempfile.TemporaryDirectory() as temp_dir:
+                temp_dir = Path(temp_dir)
                 image_paths = []
-                
+
                 # Save uploaded files and collect paths
                 for uploaded_file in uploaded_files:
-                    temp_path = os.path.join(temp_dir, uploaded_file.name)
+                    temp_path = temp_dir / uploaded_file.name
                     with open(temp_path, "wb") as f:
                         f.write(uploaded_file.getvalue())
                     image_paths.append(temp_path)
@@ -169,14 +176,14 @@ def main():
                         if len(image_paths) == 1:
                             # Single image processing
                             result = process_single_image(
-                                processor, 
-                                image_paths[0], 
+                                processor,
+                                image_paths[0],
                                 format_type,
                                 enable_preprocessing
                             )
                             st.subheader("📝 Extracted Text")
                             st.markdown(result)
-                            
+
                             # Download button for single result
                             st.download_button(
                                 "📥 Download Result",
@@ -192,7 +199,7 @@ def main():
                                 format_type,
                                 enable_preprocessing
                             )
-                            
+
                             # Display statistics
                             st.subheader("📊 Processing Statistics")
                             col1, col2, col3 = st.columns(3)
@@ -242,6 +249,7 @@ def main():
         - **LLaVA 7B**: Efficient vision-language model for real-time processing
         - **Llama 3.2 Vision**: Advanced model with high accuracy for complex documents
         """)
+
 
 if __name__ == "__main__":
     main()
