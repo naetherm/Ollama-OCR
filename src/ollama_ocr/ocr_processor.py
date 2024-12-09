@@ -93,7 +93,7 @@ class OCRProcessor:
                 image_base64 = _encode_image(image)
 
                 # Clean up temporary files
-                if image.stem.endswith(('_preprocessed.jpg', '_temp.jpg')):
+                if image.stem.endswith(('_preprocessed', '_temp')):
                     os.remove(image)
             else:
                 image_base64 = base64.b64encode(image)
