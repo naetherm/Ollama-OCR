@@ -90,7 +90,7 @@ ocr = OCRProcessor(model_name='llama3.2-vision:11b', max_workers=4)  # max worke
 # Process multiple images
 # Process multiple images with progress tracking
 batch_results = ocr.process_batch(
-    input="path/to/images/folder",  # Directory or list of image paths
+    input_path="path/to/images/folder",  # Directory or list of image paths
     format_type="markdown",
     recursive=True,  # Search subdirectories
     preprocess=True  # Enable image preprocessing
