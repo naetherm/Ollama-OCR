@@ -44,9 +44,6 @@ def _preprocess_image(image_path: Path) -> Path:
     # Denoise
     denoised = cv2.fastNlMeansDenoising(enhanced)
 
-    # Auto-rotate if needed
-    # TODO: Implement rotation detection and correction
-
     # Save preprocessed image
     preprocessed_path = Path(f"{image_path}_preprocessed.jpg")
     cv2.imwrite(str(preprocessed_path), denoised)
