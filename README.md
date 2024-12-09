@@ -161,9 +161,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 Built with Ollama
 Powered by LLaMA Vision Models
-
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=naetherm/Ollama-OCR&type=Date)](https://star-history.com/#naetherm/Ollama-OCR&Date)
-
