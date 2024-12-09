@@ -1,7 +1,8 @@
 from langchain_ollama import OllamaLLM
 from PIL import Image
 import json
-from typing import Optional, Dict, Any, List, Union
+from typing import Any
+from pathlib import Path
 import os
 import base64
 import requests
@@ -13,7 +14,7 @@ import numpy as np
 from pdf2image import convert_from_path
 
 
-def _preprocess_image(image_path: str) -> str:
+def _preprocess_image(image_path: Path) -> Path:
     """
     Preprocess image before OCR:
     - Convert PDF to image if needed
@@ -22,7 +23,7 @@ def _preprocess_image(image_path: str) -> str:
     - Reduce noise
     """
     # Handle PDF files
-    if image_path.lower().endswith('.pdf'):
+    if image_path.suffix.lower().endswith('.pdf'):
         pages = convert_from_path(image_path)
         if not pages:
             raise ValueError("Could not convert PDF to image")
@@ -50,25 +51,35 @@ def _preprocess_image(image_path: str) -> str:
     # TODO: Implement rotation detection and correction
 
     # Save preprocessed image
-    preprocessed_path = f"{image_path}_preprocessed.jpg"
-    cv2.imwrite(preprocessed_path, denoised)
+    preprocessed_path = Path(f"{image_path}_preprocessed.jpg")
+    cv2.imwrite(str(preprocessed_path), denoised)
 
     return preprocessed_path
 
 
-def _encode_image(image_path: str) -> str:
+def _encode_image(image_path: Path) -> str:
     """Convert image to base64 string"""
-    with open(image_path, "rb") as image_file:
+    with image_path.open("rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
 class OCRProcessor:
+    """
+    OCR processor using Ollama LLM as backbone.
+    """
     def __init__(self, model_name: str = "llama3.2-vision:11b", max_workers: int = 1):
+        """
+        Initialize OCRProcessor with the specified model and max number of workers
+
+        Args:
+            model_name: Name of the Ollama LLM model to use (e.g., "llama3.2-vision:11b")
+            max_workers: Maximum number of workers for concurrent processing
+        """
         self.model_name = model_name
         self.base_url = "http://localhost:11434/api/generate"
         self.max_workers = max_workers
 
-    def process_image(self, image_path: str, format_type: str = "markdown", preprocess: bool = True) -> str:
+    def process_image(self, image_path: Path, format_type: str = "markdown", preprocess: bool = True) -> str:
         """
         Process an image and extract text in the specified format
         
@@ -84,7 +95,7 @@ class OCRProcessor:
             image_base64 = _encode_image(image_path)
             
             # Clean up temporary files
-            if image_path.endswith(('_preprocessed.jpg', '_temp.jpg')):
+            if image_path.stem.endswith(('_preprocessed.jpg', '_temp.jpg')):
                 os.remove(image_path)
 
             # Generic prompt templates for different formats
@@ -151,11 +162,11 @@ class OCRProcessor:
 
     def process_batch(
         self,
-        input_path: Union[str, List[str]],
+        input_path: Path | list[Path],
         format_type: str = "markdown",
         recursive: bool = False,
         preprocess: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Process multiple images in batch
         
@@ -170,8 +181,8 @@ class OCRProcessor:
         """
         # Collect all image paths
         image_paths = []
-        if isinstance(input_path, str):
-            base_path = Path(input_path)
+        if isinstance(input_path, Path):
+            base_path = input_path
             if base_path.is_dir():
                 pattern = '**/*' if recursive else '*'
                 for ext in ['.png', '.jpg', '.jpeg', '.pdf', '.tiff']:
@@ -188,7 +199,7 @@ class OCRProcessor:
         with tqdm(total=len(image_paths), desc="Processing images") as pbar:
             with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                 future_to_path = {
-                    executor.submit(self.process_image, str(path), format_type, preprocess): path
+                    executor.submit(self.process_image, path, format_type, preprocess): path
                     for path in image_paths
                 }
                 
